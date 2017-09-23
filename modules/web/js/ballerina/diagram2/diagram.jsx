@@ -124,23 +124,15 @@ class Diagram extends React.Component {
         //    a CsnvasDecorator and pass child components for that.
 
         */
-        console.log(this.props.model);
-        let topLevelNodes = false;
-        if (this.props.model.getTopLevelNodes()) {
-            if (this.props.model.getTopLevelNodes().length > 0) {
-                topLevelNodes = true;
-            }
-        }
+        let tln = (this.props.model.getTopLevelNodes()) ? this.props.model.getTopLevelNodes() : [];
+        let children = getComponentForNodeArray(tln, this.props.mode);
+        console.log(children);
         return (<CanvasDecorator
             dropTarget={this.props.model}
             bBox={viewState.bBox}
             // TODOX annotations={annotations}
         >
-            <h2 id="heading2"> design </h2>
-            { /* TODOX others */}
-            { topLevelNodes &&
-                <PackageDefinition model={this.props.model.getPackageDeclaration()} />
-            }
+            { children }
         </CanvasDecorator>);
     }
 }
