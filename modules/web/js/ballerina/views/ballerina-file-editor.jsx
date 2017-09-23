@@ -428,7 +428,7 @@ class BallerinaFileEditor extends React.Component {
         newAst.accept(findBreakpointsVisiter);
         const breakpoints = findBreakpointsVisiter.getBreakpoints();
         const fileName = this.props.file.getName();
-        const packagePath = newAst.getPackageDefinition().getPackageName() || '.';
+        const packagePath = newAst.getPackageDeclaration().package || '.';
         DebugManager.removeAllBreakpoints(fileName);
         breakpoints.forEach((lineNumber) => {
             DebugManager.addBreakPoint(lineNumber, fileName, packagePath);

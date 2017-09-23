@@ -27,6 +27,7 @@ import AnnotationRenderingVisitor from '../visitors/annotation-rendering-visitor
 import { getComponentForNodeArray, getDesigner } from './diagram-util';
 import ActiveArbiter from '../diagram/views/default/components/active-arbiter';
 import CompilationUnitNode from './../model/tree/compilation-unit-node';
+import PackageDefinition from '../diagram2/views/default/components/package-declaration-node';
 
 
 /**
@@ -123,13 +124,23 @@ class Diagram extends React.Component {
         //    a CsnvasDecorator and pass child components for that.
 
         */
+        console.log(this.props.model);
+        let topLevelNodes = false;
+        if (this.props.model.getTopLevelNodes()) {
+            if (this.props.model.getTopLevelNodes().length > 0) {
+                topLevelNodes = true;
+            }
+        }
         return (<CanvasDecorator
             dropTarget={this.props.model}
             bBox={viewState.bBox}
             // TODOX annotations={annotations}
         >
-            <h2> design </h2>
+            <h2 id="heading2"> design </h2>
             { /* TODOX others */}
+            { topLevelNodes &&
+                <PackageDefinition model={this.props.model.getPackageDeclaration()} />
+            }
         </CanvasDecorator>);
     }
 }

@@ -198,4 +198,4 @@ class AbstractTreeUtil {
 
 }
 
-export default AbstractTreeUtil;
+export default new AbstractTreeUtil();

@@ -42,7 +42,9 @@ class ImportDimensionVisitor {
      * @memberOf ImportDimensionVisitor
      * */
     endVisit(node) {
-        
+        const viewState = node.viewState;
+        viewState.bBox.h = 0;
+        viewState.bBox.w = 0;
     }
 }
 

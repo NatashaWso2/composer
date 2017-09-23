@@ -22,10 +22,10 @@ class CompilationUnitNodeAbstract extends Node {
 
 
     setTopLevelNodes(newValue, silent, title) {
-        let oldValue = this.topLevelNodes;
+        const oldValue = this.topLevelNodes;
         title = (_.isNil(title)) ? `Modify ${this.kind}` : title;
         this.topLevelNodes = newValue;
-        if(!silent) {
+        if (!silent) {
             this.trigger('tree-modified', {
                 origin: this,
                 type: 'modify-node',
@@ -34,7 +34,7 @@ class CompilationUnitNodeAbstract extends Node {
                     attributeName: 'topLevelNodes',
                     newValue,
                     oldValue,
-                }
+                },
             });
         }
     }
@@ -44,7 +44,7 @@ class CompilationUnitNodeAbstract extends Node {
     }
 
 
-    addTopLevelNodes(node, i = -1, silent){
+    addTopLevelNodes(node, i = -1, silent) {
         node.parent = this;
         let index = i;
         if (i === -1) {
@@ -53,7 +53,7 @@ class CompilationUnitNodeAbstract extends Node {
         } else {
             this.topLevelNodes.splice(i, 0, node);
         }
-        if(!silent) {
+        if (!silent) {
             this.trigger('tree-modified', {
                 origin: this,
                 type: 'child-added',
@@ -68,10 +68,10 @@ class CompilationUnitNodeAbstract extends Node {
 
 
     setName(newValue, silent, title) {
-        let oldValue = this.name;
+        const oldValue = this.name;
         title = (_.isNil(title)) ? `Modify ${this.kind}` : title;
         this.name = newValue;
-        if(!silent) {
+        if (!silent) {
             this.trigger('tree-modified', {
                 origin: this,
                 type: 'modify-node',
@@ -80,7 +80,7 @@ class CompilationUnitNodeAbstract extends Node {
                     attributeName: 'name',
                     newValue,
                     oldValue,
-                }
+                },
             });
         }
     }
@@ -90,12 +90,11 @@ class CompilationUnitNodeAbstract extends Node {
     }
 
 
-
     setWS(newValue, silent, title) {
-        let oldValue = this.wS;
+        const oldValue = this.wS;
         title = (_.isNil(title)) ? `Modify ${this.kind}` : title;
         this.wS = newValue;
-        if(!silent) {
+        if (!silent) {
             this.trigger('tree-modified', {
                 origin: this,
                 type: 'modify-node',
@@ -104,7 +103,7 @@ class CompilationUnitNodeAbstract extends Node {
                     attributeName: 'wS',
                     newValue,
                     oldValue,
-                }
+                },
             });
         }
     }
@@ -114,12 +113,11 @@ class CompilationUnitNodeAbstract extends Node {
     }
 
 
-
     setKind(newValue, silent, title) {
-        let oldValue = this.kind;
+        const oldValue = this.kind;
         title = (_.isNil(title)) ? `Modify ${this.kind}` : title;
         this.kind = newValue;
-        if(!silent) {
+        if (!silent) {
             this.trigger('tree-modified', {
                 origin: this,
                 type: 'modify-node',
@@ -128,7 +126,7 @@ class CompilationUnitNodeAbstract extends Node {
                     attributeName: 'kind',
                     newValue,
                     oldValue,
-                }
+                },
             });
         }
     }
@@ -138,12 +136,11 @@ class CompilationUnitNodeAbstract extends Node {
     }
 
 
-
     setPosition(newValue, silent, title) {
-        let oldValue = this.position;
+        const oldValue = this.position;
         title = (_.isNil(title)) ? `Modify ${this.kind}` : title;
         this.position = newValue;
-        if(!silent) {
+        if (!silent) {
             this.trigger('tree-modified', {
                 origin: this,
                 type: 'modify-node',
@@ -152,7 +149,7 @@ class CompilationUnitNodeAbstract extends Node {
                     attributeName: 'position',
                     newValue,
                     oldValue,
-                }
+                },
             });
         }
     }
@@ -160,7 +157,6 @@ class CompilationUnitNodeAbstract extends Node {
     getPosition() {
         return this.position;
     }
-
 
 
 }

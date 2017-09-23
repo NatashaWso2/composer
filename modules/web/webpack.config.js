@@ -67,12 +67,12 @@ const config = [{
     },
     plugins: [
         extractCSSBundle,
-        new UnusedFilesWebpackPlugin({
-            pattern: 'js/**/*.*',
+        /*new UnusedFilesWebpackPlugin({
+            pattern: 'js/!**!/!*.*',
             globOptions: {
-                ignore: 'js/tests/**/*.*',
+                ignore: 'js/tests/!**!/!*.*',
             },
-        }),
+        }),*/
         // https://github.com/fronteed/icheck/issues/322
         new webpack.ProvidePlugin({
             $: 'jquery',
