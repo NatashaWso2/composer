@@ -20,33 +20,9 @@
  *
  * @class ConnectorHelper
  */
-class ConnectorHelper {
-    /**
-     * Get the default values of the connector parameters according to the bType
-     * @param bType
-     * @returns {*}
-     */
-    static getDefaultValuesAccordingToBType(bType) {
-        let defaultValue;
-        switch (bType) {
-            case 'string':
-                defaultValue = '';
-                break;
-            case 'int':
-                defaultValue = 0;
-                break;
-            case 'boolean':
-                defaultValue = false;
-                break;
-            case 'array':
-                defaultValue = '[]';
-                break;
-            default:
-                defaultValue = '';
-        }
-        return defaultValue;
-    }
+import Environment from './../environment';
 
+class ConnectorHelper {
     /**
      * Gets the connector parameters of a connector
      * @param environment The ballerina environment.
@@ -63,30 +39,44 @@ class ConnectorHelper {
                         // Get Connection Properties
                         connector.getParams().map((parameter) => {
                             let structFields = null;
-                            if (parameter.type === (fullPackageName + ':Options')) {
+                            if (parameter.type.startsWith(fullPackageName)) {
+                                // Get the struct name of the connector
+                                const structName = parameter.type.split(':')[1];
                                 for (const structDef of packageDefintion.getStructDefinitions()) {
-                                    if (structDef.getName() === 'Options') {
+                                    if (structDef.getName() === structName) {
                                         // Iterate over the struct fields to get their default values
                                         structFields = structDef.getFields();
-                                        structFields.map((field) => {
-                                            if (field.getDefaultValue() === undefined) {
-                                                field.setDefaultValue(this
-                                                    .getDefaultValuesAccordingToBType(field.getType()));
-                                            }
-                                        });
                                     }
                                 }
+                                // Set the option name into the attributes
+                                const optionProps = {
+                                    identifier: 'Options',
+                                    bType: 'options',
+                                    value: '{}',
+                                    fields: structFields,
+                                };
+                                connectorParameters.push(optionProps);
+                                structFields.map((field) => {
+                                    if (field.getDefaultValue() === undefined) {
+                                        const keyValuePair = {
+                                            identifier: 'Options:' + field.getName(),
+                                            bType: field.getType(),
+                                            desc: field.getName(),
+                                            value: Environment.getDefaultValue(field.getType()),
+                                        };
+                                        connectorParameters.push(keyValuePair);
+                                    }
+                                });
+                            } else {
+                                // Check the bType of each attribute and set the default values accordingly
+                                const keyValuePair = {
+                                    identifier: parameter.name,
+                                    bType: parameter.type,
+                                    desc: parameter.name,
+                                    value: Environment.getDefaultValue(parameter.type),
+                                };
+                                connectorParameters.push(keyValuePair);
                             }
-
-                            // Check the bType of each attribute and set the default values accordingly
-                            const keyValuePair = {
-                                identifier: parameter.name,
-                                bType: parameter.type,
-                                desc: parameter.name,
-                                fields: structFields,
-                                value: this.getDefaultValuesAccordingToBType(parameter.type),
-                            };
-                            connectorParameters.push(keyValuePair);
                         });
                     }
                     break;

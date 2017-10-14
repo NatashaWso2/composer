@@ -67,36 +67,34 @@ class ConnectorPropertiesForm extends React.Component {
         const addedValues = this.getDataAddedToConnectorInit();
         connectorProps.map((property, index) => {
             if (addedValues.length > 0 && (index <= addedValues.length - 1)) {
+                let indexOfOptions = 0;
                 // Check for the connection properties
-                // TODO make the logic generic. The options/structs of a connector now doesn't come with a generic type
-                if (property.identifier === 'connectorOptions' || property.identifier === 'options') {
+                if (property.identifier === 'Options') {
+                    indexOfOptions = index;
                     if (TreeUtils.isSimpleVariableRef(addedValues[index])) {
                         property.value = this.getAddedValueOfProp(addedValues[index]);
-                    } else {
-                        // Check the field values given
-                        if (property.fields) {
-                            if (TreeUtils.isRecordLiteralExpr(addedValues[index])) { // If its a map
-                                // Get all the key-value pairs
-                                if (addedValues[index].getKeyValuePairs()) {
-                                    addedValues[index].getKeyValuePairs().map((element) => {
-                                        if (TreeUtils.isRecordLiteralKeyValue(element)) {
-                                            const key = element.getKey().getVariableName().value;
-                                                // Get the value
-                                            if (element.getValue()) {
-                                                // Iterate over the property fields until the key matches the field name
-                                                property.fields.map((field) => {
-                                                    if (field.getName() === key) {
-                                                        field.setDefaultValue(this
-                                                            .getAddedValueOfProp(element.getValue()));
-                                                    }
-                                                });
+                    } else if (TreeUtils.isRecordLiteralExpr(addedValues[indexOfOptions])) { // If its a map
+                     // Get all the key-value pairs
+                        if (addedValues[indexOfOptions].getKeyValuePairs()) {
+                            addedValues[indexOfOptions].getKeyValuePairs().map((element) => {
+                                if (TreeUtils.isRecordLiteralKeyValue(element)) {
+                                    const key = element.getKey().getVariableName().value;
+                                    // Get the value
+                                    if (element.getValue()) {
+                                    // Iterate over the property fields until the key matches the field name
+                                        connectorProps.map((prop) => {
+                                            const identifier = prop.identifier.replace('Options:', '');
+                                            if (key === identifier) {
+                                                prop.value = this.getAddedValueOfProp(element.getValue());
                                             }
-                                        }
-                                    });
+                                        });
+                                    }
                                 }
-                            }
+                            });
                         }
+                        property.value = '';
                     }
+                   // }
                 } else {
                     property.value = this.getAddedValueOfProp(addedValues[index]);
                 }
@@ -127,14 +125,8 @@ class ConnectorPropertiesForm extends React.Component {
         const optionProps = {};
         // Filter all values in the connection option struct
         Object.keys(data).forEach((key) => {
-            // TODO make the logic generic. The options/structs of a connector now doesn't come with a generic type
-            if (key.startsWith('connectorOptions:')) {
-                const propName = key.replace('connectorOptions:', '');
-                optionProps[propName] = data[key];
-            }
-
-            if (key.startsWith('options:')) {
-                const propName = key.replace('options:', '');
+            if (key.startsWith('Options:')) {
+                const propName = key.replace('Options:', '');
                 optionProps[propName] = data[key];
             }
         });
@@ -144,10 +136,9 @@ class ConnectorPropertiesForm extends React.Component {
             this.getSupportedProps().map((property) => {
                 let nodeToBeAdded = null;
                 let indexOfThisNode = 0;
-                if (key === property.identifier) {
+                if (key === property.identifier && !key.startsWith('Options:')) {
                     // Check for options
-                    // TODO make the logic generic. The options properties of a connector now doesn't come with a generic type
-                    if (key === 'connectorOptions' || key === 'options') {
+                    if (key === 'Options') {
                         if (data[key]) {
                             // Create an identifier node
                             const variableNameNode = NodeFactory.createIdentifier({ value: data[key] });
@@ -170,32 +161,33 @@ class ConnectorPropertiesForm extends React.Component {
                                 if (optionProps[prop]) {
                                     // Iterate over the property fields of the struct to preserve the
                                     // order and to get the bType
-                                    if (property.fields) {
-                                        property.fields.map((field) => {
-                                            if (prop === field.getName()) {
-                                                // Get value of property
-                                                let value = optionProps[prop];
-                                                // Get type of the prop field
-                                                if (field.getType() === 'string') {
-                                                    value = this.addQuotationForStringValues(value);
-                                                }
-                                                // Create a SimpleVarDef Node for the key
-                                                const variableNameNode = NodeFactory.createIdentifier({ value: prop });
-                                                const simpleVarDefNode = NodeFactory.createSimpleVariableRef({
-                                                    variableName: variableNameNode });
-                                                // Create a Literal Node for the value
-                                                const literalNode = NodeFactory.createLiteral({ value });
-                                                // Create a Record Literal Value Node
-                                                const recordLiteralKeyValueNode = NodeFactory.createRecordLiteralKeyValue({ key: simpleVarDefNode, value: literalNode });
-                                                let index = recordLiteralExprNode.getKeyValuePairs().length - 1;
-                                                if (index === -1) {
-                                                    index = 0;
-                                                }
-                                                // Add the key-value pair node to the RecordLiteralExpr node
-                                                recordLiteralExprNode.addKeyValuePairs(recordLiteralKeyValueNode, index + 1, true);
+                                    property.fields.map((field) => {
+                                        if (prop === field.getName()) {
+                                        // Get value of property
+                                            let value = optionProps[prop];
+                                        // Get type of the prop field
+                                            if (field.getType() === 'string') {
+                                                value = this.addQuotationForStringValues(value);
                                             }
-                                        });
-                                    }
+                                        // Create a SimpleVarDef Node for the key
+                                            const variableNameNode = NodeFactory.createIdentifier({ value: prop });
+                                            const simpleVarDefNode = NodeFactory.createSimpleVariableRef({
+                                                variableName: variableNameNode,
+                                            });
+                                        // Create a Literal Node for the value
+                                            const literalNode = NodeFactory.createLiteral({ value });
+                                        // Create a Record Literal Value Node
+                                            const recordLiteralKeyValueNode = NodeFactory
+                                            .createRecordLiteralKeyValue({ key: simpleVarDefNode, value: literalNode });
+                                            let index = recordLiteralExprNode.getKeyValuePairs().length - 1;
+                                            if (index === -1) {
+                                                index = 0;
+                                            }
+                                        // Add the key-value pair node to the RecordLiteralExpr node
+                                            recordLiteralExprNode
+                                            .addKeyValuePairs(recordLiteralKeyValueNode, index + 1, true);
+                                        }
+                                    });
                                 }
                             });
                             // Add the RecordLiteralExpr Node to the connector init expression
@@ -256,7 +248,6 @@ class ConnectorPropertiesForm extends React.Component {
      * @memberof connector properties window
      */
     render() {
-        // this.getSupportedProps();
         const props = this.props.model.props;
         const positionX = (props.bBox.x) - 8 + 'px';
         const positionY = (props.bBox.y) + 'px';
@@ -265,7 +256,7 @@ class ConnectorPropertiesForm extends React.Component {
             popover: {
                 top: props.bBox.y + 10 + 'px',
                 left: positionX,
-                height: '340px',
+                height: '360px',
                 minWidth: '500px',
             },
             arrowStyle: {
@@ -283,7 +274,7 @@ class ConnectorPropertiesForm extends React.Component {
                 formHeading='Connector Properties'
                 key={`connectorProp/${props.model.id}`}
                 styles={styles}
-                supportedProps={this.getSupportedProps()}
+                supportedProps={supportedProps}
                 addedValues={this.setDataToConnectorInitArgs}
             />);
     }
