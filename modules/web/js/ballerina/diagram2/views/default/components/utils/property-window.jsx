@@ -304,7 +304,7 @@ class PropertiesWindow extends React.Component {
                                         return this.renderBooleanInputs(identifier, booleanValue);
                                     } else if (type === 'array') {
                                         return this.renderTagInputs(identifier);
-                                    } else if (type === 'options') {
+                                    } else {
                                         return this.renderTextInputs(identifier);
                                     }
                                 })}

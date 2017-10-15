@@ -62,7 +62,7 @@ class ConnectorHelper {
                                             identifier: 'Options:' + field.getName(),
                                             bType: field.getType(),
                                             desc: field.getName(),
-                                            value: Environment.getDefaultValue(field.getType()),
+                                            value: this.getDefaultValue(field.getType()),
                                         };
                                         connectorParameters.push(keyValuePair);
                                     }
@@ -73,7 +73,7 @@ class ConnectorHelper {
                                     identifier: parameter.name,
                                     bType: parameter.type,
                                     desc: parameter.name,
-                                    value: Environment.getDefaultValue(parameter.type),
+                                    value: this.getDefaultValue(parameter.type),
                                 };
                                 connectorParameters.push(keyValuePair);
                             }
@@ -84,6 +84,28 @@ class ConnectorHelper {
             }
         }
         return connectorParameters;
+    }
+
+    /**
+     * Get default value
+     */
+    static getDefaultValue(type) {
+        let value;
+        switch (type) {
+            case 'int':
+                value = 0;
+                break;
+            case 'string':
+                value = '';
+                break;
+            case 'boolean':
+                value = false;
+                break;
+            case 'map':
+                value = '{}';
+                break;
+        }
+        return value;
     }
 
 }
