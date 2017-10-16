@@ -38,35 +38,19 @@ class ConnectorHelper {
                     for (const connector of packageDefintion.getConnectors()) {
                         // Get Connection Properties
                         connector.getParams().map((parameter) => {
-                            let structFields = null;
                             if (parameter.type.startsWith(fullPackageName)) {
+                                // const structFields = [];
                                 // Get the struct name of the connector
                                 const structName = parameter.type.split(':')[1];
-                                for (const structDef of packageDefintion.getStructDefinitions()) {
-                                    if (structDef.getName() === structName) {
-                                        // Iterate over the struct fields to get their default values
-                                        structFields = structDef.getFields();
-                                    }
-                                }
-                                // Set the option name into the attributes
                                 const optionProps = {
-                                    identifier: 'Options',
-                                    bType: 'options',
-                                    value: '{}',
-                                    fields: structFields,
+                                    identifier: structName,
+                                    bType: 'struct',
+                                    value: this.getDefaultValue(parameter.type),
+                                    isStruct: true,
                                 };
                                 connectorParameters.push(optionProps);
-                                structFields.map((field) => {
-                                    if (field.getDefaultValue() === undefined) {
-                                        const keyValuePair = {
-                                            identifier: 'Options:' + field.getName(),
-                                            bType: field.getType(),
-                                            desc: field.getName(),
-                                            value: this.getDefaultValue(field.getType()),
-                                        };
-                                        connectorParameters.push(keyValuePair);
-                                    }
-                                });
+                                this.getStructDataFields(fullPackageName,
+                                    packageDefintion.getStructDefinitions(), structName, connectorParameters);
                             } else {
                                 // Check the bType of each attribute and set the default values accordingly
                                 const keyValuePair = {
@@ -74,6 +58,7 @@ class ConnectorHelper {
                                     bType: parameter.type,
                                     desc: parameter.name,
                                     value: this.getDefaultValue(parameter.type),
+                                    isStruct: false,
                                 };
                                 connectorParameters.push(keyValuePair);
                             }
@@ -101,13 +86,39 @@ class ConnectorHelper {
             case 'boolean':
                 value = false;
                 break;
-            case 'map':
-                value = '{}';
-                break;
+            default:
+                value = '';
         }
         return value;
     }
 
+    static getStructDataFields(fullPackageName, structDefinitions, structName, structFields) {
+        for (const structDef of structDefinitions) {
+            const name = structName.split(':').pop();
+            if (structDef.getName() === name) {
+                // structFields.push(optionProps);
+                structDef.getFields().map((field) => {
+                    if (field.getDefaultValue() === undefined) {
+                        field.setDefaultValue(this.getDefaultValue(field.getType()));
+                    }
+                    const keyValuePair = {
+                        identifier: structName + ':' + field.getName(),
+                        bType: field.getType(),
+                        desc: field.getName(),
+                        value: this.getDefaultValue(field.getType()),
+                        isStruct: true,
+                    };
+                    structFields.push(keyValuePair);
+
+                    if (field.getType().startsWith(fullPackageName)) {
+                        const innerStructName = structName + ':' + field.getType().split(':')[1];
+                        this.getStructDataFields(fullPackageName, structDefinitions, innerStructName, structFields);
+                    }
+                });
+            }
+        }
+        return structFields;
+    }
 }
 
 export default ConnectorHelper;
